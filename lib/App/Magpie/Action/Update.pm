@@ -25,6 +25,17 @@ there's one available.
 
 =cut
 
+sub _calc_cpan_mini_dir {
+    my $self = shift;
+
+    # check if we have a minicpan at hand
+    my $cpanmconf = CPAN::Mini->config_file;
+    defined($cpanmconf)
+        or $self->log_fatal("no minicpan installation found, aborting");
+    my %config   = CPAN::Mini->read_config( {quiet=>1} );
+    return path( $config{local} );
+}
+
 sub run {
     my ($self) = @_;
 
@@ -50,12 +61,7 @@ sub run {
     defined($distvers) or $self->log_fatal( "package does not use %upstream_version" );
     $self->log_debug( "perl distribution to update: $distname v$distvers" );
 
-    # check if we have a minicpan at hand
-    my $cpanmconf = CPAN::Mini->config_file;
-    defined($cpanmconf)
-        or $self->log_fatal("no minicpan installation found, aborting");
-    my %config   = CPAN::Mini->read_config( {quiet=>1} );
-    my $cpanmdir = path( $config{local} );
+    my $cpanmdir = $self->_calc_cpan_mini_dir;
     $self->log_debug( "found a minicpan installation in $cpanmdir" );
 
     # try to find a newer version
