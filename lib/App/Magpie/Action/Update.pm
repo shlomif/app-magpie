@@ -36,6 +36,15 @@ sub _calc_cpan_mini_dir {
     return path( $config{local} );
 }
 
+sub _calc_dist {
+    my ($self, $cpanmdir, $distname) = @_;
+
+    $self->log_debug( "parsing 02packages.details.txt.gz" );
+    my $modgz   = $cpanmdir->child("modules", "02packages.details.txt.gz");
+    my $p       = Parse::CPAN::Packages::Fast->new( $modgz->stringify );
+    return $p->latest_distribution( $distname );
+}
+
 sub run {
     my ($self) = @_;
 
@@ -65,10 +74,7 @@ sub run {
     $self->log_debug( "found a minicpan installation in $cpanmdir" );
 
     # try to find a newer version
-    $self->log_debug( "parsing 02packages.details.txt.gz" );
-    my $modgz   = $cpanmdir->child("modules", "02packages.details.txt.gz");
-    my $p       = Parse::CPAN::Packages::Fast->new( $modgz->stringify );
-    my $dist    = $p->latest_distribution( $distname );
+    my $dist = $self->_calc_dist($cpanmdir, $distname);
     my $newvers = $dist->version;
     if ( version->new( $newvers ) <= version->new( $distvers ) ) {
         $self->log( "no new version found" );
