@@ -111,7 +111,9 @@ EOF
     # try to install buildrequires
     if ( ! $ENV{MAGPIE_NO_URPMI_BUILDREQUIRES} ) {
         $self->log( "installing buildrequires" );
-        $self->run_command( "LC_ALL=C sudo urpmi --wait-lock --buildrequires $specfile" );
+        # Added --auto to speed up things and avoid interactive prompts.
+        #       -- Shlomi Fish
+        $self->run_command( "LC_ALL=C sudo urpmi --auto --wait-lock --buildrequires $specfile" );
     }
 
     # fix spec file, update buildrequires
